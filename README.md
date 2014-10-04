@@ -8,8 +8,8 @@ Usage:
 
 ``` js
 $.ajax({
-	url: 'test.json',
-	dataType: 'json',
+	url: 'your-ajax-request-url',
+	dataType: 'html',               // HTML response expected from ajax request
 	localCache: true, 		// enable localStorage
 	forceCache: false, 		// force to make an ajax request and cache it
 	cacheKey: 'mydata', 	// the item name in the localStorage
