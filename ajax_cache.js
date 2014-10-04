@@ -7,16 +7,17 @@ $.ajaxPrefilter(function(options, originalOptions, jqXHR){
 
 	// cache ttl in seconds
 	var ttl = options.cacheTTL || 60,
-		cached = localStorage.getItem(options.cacheKey);
+	    cached = localStorage.getItem(options.cacheKey);
 
 	if( ! options.forceCache){
 		if(cached){
-			cached = JSON.parse(cached);
+                        var cachedTTL = localStorage.getItem(options.cacheKey+".ttl");
 			// if cache expired
-			if(cached.ttl < +new Date()){
+			if(cachedTTL < new Date().getTime()){
 				localStorage.removeItem(options.cacheKey);
+                                localStorage.removeItem(options.cacheKey+".ttl");
 			}else{
-				options.success(cached.cache);
+				options.success(cached);
 				// Abort is broken on JQ 1.5 :(
 				jqXHR.abort();
 				return;
@@ -32,16 +33,16 @@ $.ajaxPrefilter(function(options, originalOptions, jqXHR){
 
 	options.success = function(data){
 		var strdata = data,
-			cache = {ttl: +new Date() + 1000 * ttl, cache: data};
-		if(options.dataType.indexOf('json') === 0)
-			strdata = JSON.stringify(cache);
-
+		    cacheTTL = new Date().getTime() + 1000 * ttl;
+                    
 		// Save the data to localStorage catching exceptions (possibly QUOTA_EXCEEDED_ERR)
 		try{
 			localStorage.setItem(options.cacheKey, strdata);
+                        localStorage.setItem(options.cacheKey+".ttl", cacheTTL);
 		}catch(e){
 			// Remove any incomplete data that may have been saved before the exception was caught
 			localStorage.removeItem(options.cacheKey);
+                        localStorage.removeItem(options.cacheKey+".ttl");
 			if(options.cacheError)
 				options.cacheError(e, options.cacheKey, strdata);
 		}
